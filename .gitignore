@@ -113,3 +113,9 @@ all.config
 
 # Kdevelop4
 *.kdev4
+
+
+drivers/kernelsu
+out/
+*.zip
+log*.txt
