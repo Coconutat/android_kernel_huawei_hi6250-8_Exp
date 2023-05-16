@@ -18,25 +18,9 @@ device.name2=
 . /tmp/anykernel/tools/ak2-core.sh;
 
 
-
-# shell variables
-block=/dev/block/bootdevice/by-name/ramdisk;
-is_slot_device=auto;
-ramdisk_compression=auto;
-
-
-## AnyKernel ramdisk install
-
 ui_print "------------Installing KernelSU Kernel------------";
 ui_print "---------KernelSU integrate By Coconutat----------";
 ui_print "-----------------加油华为，加油中国！-----------------";
-
-
-dump_boot;
-
-write_boot;
-
-## end install
 
 
 # shell variables
