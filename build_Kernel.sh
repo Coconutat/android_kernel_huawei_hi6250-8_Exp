@@ -14,8 +14,8 @@ fi
 echo " "
 echo "***Setting environment...***"
 # 交叉编译器路径
-export PATH=$PATH:
-export CROSS_COMPILE=aarch64-elf-
+export PATH=$PATH:/home/coconutat/Downloads/Github/android_kernel_huawei_hi6250-8_Exp/aarch64-linux-android-4.9/bin
+export CROSS_COMPILE=aarch64-linux-android-
 
 export GCC_COLORS=auto
 export ARCH=arm64
@@ -24,58 +24,35 @@ then
 	mkdir out
 fi
 
-#添加或更新AK3
+date="$(date +%Y.%m.%d-%I:%M)"
 
-if [ -f tools/AnyKernel3/README.md ];
-then
-	cd tools/AnyKernel3
-	echo " "
-	echo "***Updating AnyKernel3...***"
-	echo " "
-	git pull upstream master
-else
-	echo " "
-	echo "***Adding AnyKernel3...***"
-	echo " "
-	git submodule update --init --recursive
-	cd tools/AnyKernel3
-	git remote add upstream https://github.com/osm0sis/AnyKernel3
-	echo "***Updating AnyKernel3...***"
-	echo " "
-	git pull upstream master
-fi
-cd ../..
-echo " "
-
-#输入盘古内核版本号
-printf "Please enter Pangu Kernel version number: "
+# 输入内核版本号
+printf "Please enter KernelSU Kernel version number: "
 read v
 echo " "
 echo "Setting EXTRAVERSION"
-export EV=EXTRAVERSION=_Kirin960_Pangu_KSU_V$v
+export EV=EXTRAVERSION=_KSU_V$v
 
 #构建P10内核部分
-echo "***Building for P10 version...***"
-make ARCH=arm64 O=out $EV Pangu_P10_KSU_defconfig
+echo "***Building for hi6250 version...***"
+make ARCH=arm64 O=out $EV merge_hi6250_KSU_defconfig
 # 定义编译线程数
-make ARCH=arm64 O=out $EV -j256
+make ARCH=arm64 O=out $EV -j256 2>&1 | tee log-${date}.txt
 
 #打包P10版内核
 
 if [ -f out/arch/arm64/boot/Image.gz ];
 then
-	echo "***Packing P10 version kernel...***"
-	tools/mkbootimg --kernel out/arch/arm64/boot/Image.gz --base 0x0 --cmdline "loglevel=4 initcall_debug=n page_tracker=on slub_min_objects=16 unmovable_isolate1=2:192M,3:224M,4:256M printktimer=0xfff0a000,0x534,0x538 androidboot.selinux=enforcing buildvariant=user" --tags_offset 0x07A00000 --kernel_offset 0x00080000 --ramdisk_offset 0x07c00000 --header_version 1 --os_version 9 --os_patch_level 2020-09-05  --output PK_V"$v"_9.0_P10.img
-	tools/mkbootimg --kernel out/arch/arm64/boot/Image.gz --base 0x0 --cmdline "loglevel=4 initcall_debug=n page_tracker=on slub_min_objects=16 unmovable_isolate1=2:192M,3:224M,4:256M printktimer=0xfff0a000,0x534,0x538 androidboot.selinux=permissive buildvariant=user" --tags_offset 0x07A00000 --kernel_offset 0x00080000 --ramdisk_offset 0x07c00000 --header_version 1 --os_version 9 --os_patch_level 2020-09-05  --output PK_V"$v"_9.0_P10_PM.img
-	cp out/arch/arm64/boot/Image.gz tools/AnyKernel3/Image.gz
+	echo "***Packing hi6250 version kernel...***"
 	cp out/arch/arm64/boot/Image.gz Image.gz 
-	cd tools/AnyKernel3
-	zip -r9 PK_V"$v"_9.0_P10.zip * > /dev/null
+	cp out/arch/arm64/boot/Image.gz tools/AnyKernel2/Image.gz
+	cd tools/AnyKernel2
+	zip -r9 hi6250_KSU_V"$v"-${date}.zip * > /dev/null
 	cd ../..
-	mv tools/AnyKernel3/PK_V"$v"_9.0_P10.zip PK_V"$v"_9.0_P10.zip
-	rm -rf tools/AnyKernel3/Image.gz
+	mv tools/AnyKernel2/hi6250_KSU_V"$v"-${date}.zip hi6250_KSU_V"$v"-${date}.zip
+	rm -rf tools/AnyKernel2/Image.gz
 	echo " "
-	echo "***Sucessfully built P10 version kernel...***"
+	echo "***Sucessfully built hi6250 version kernel...***"
 	echo " "
 	exit 0
 else
